@@ -51,7 +51,7 @@ const topProducts = [
   { name: "Product E", sales: 40, revenue: "$2000" },
 ]
 
-function InfoTooltip({ content }: { content: string }) {
+export function InfoTooltip({ content }: { content: string }) {
   return (
     <TooltipProvider>
       <Tooltip>

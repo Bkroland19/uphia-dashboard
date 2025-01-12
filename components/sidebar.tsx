@@ -22,6 +22,8 @@ import {
 
 const navItems = [
 	{ name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+	{ name: "Household Data", href: "/dashboard/household", icon: LayoutDashboard },
+	{ name: "Survey Data", href: "/dashboard/survey", icon: LayoutDashboard },
 	{ name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
 	{ name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
