@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/tooltip";
 
 const navItems = [
-	{ name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-	{ name: "Household Data", href: "/dashboard/household", icon: LayoutDashboard },
+	{ name: "Household Data", href: "/dashboard", icon: LayoutDashboard },
+	// { name: "Household Data", href: "/dashboard/household", icon: LayoutDashboard },
 	{ name: "Survey Data", href: "/dashboard/survey", icon: LayoutDashboard },
 	{ name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
 	{ name: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -51,7 +51,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
 							!open && "hidden"
 						)}
 					>
-						Dashboard
+						UPHIA Dashboard
 					</h1>
 					<Button
 						variant="ghost"
