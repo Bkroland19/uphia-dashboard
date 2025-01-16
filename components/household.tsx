@@ -24,13 +24,13 @@ const Household = () => {
         ))}
       </div>
 
-      <Card>
+      <Card className='space-x-3 px-2 m-2'>
         <CardContent>
           <table className="min-w-full">
             <thead>
               <TableRow>
                 <TableHead>
-                  Household#
+                  House Hold#
                 </TableHead>
                 <TableHead>
                   HH Head
@@ -76,6 +76,7 @@ const Household = () => {
                 <TableRow key={houses.number}>
                   <TableCell>{houses.number}</TableCell>
                   <TableCell>{houses.head}</TableCell>
+                  <TableCell>{houses.location}</TableCell>
                   <TableCell>{houses.country}</TableCell>
                   <TableCell>{houses.region}</TableCell>
                   <TableCell>{houses.subregion}</TableCell>
