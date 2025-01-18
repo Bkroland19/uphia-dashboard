@@ -61,7 +61,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
 	);
 };
 
-const App: React.FC = () => {
+const CustomTable: React.FC = () => {
 	const [form] = Form.useForm();
 	const [data, setData] = useState<DataType[]>(originData);
 	const [editingKey, setEditingKey] = useState("");
@@ -189,4 +189,4 @@ const App: React.FC = () => {
 	);
 };
 
-export default App;
+export default CustomTable;

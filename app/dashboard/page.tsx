@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, CreditCard, DollarSign, Users, HelpCircle } from 'lucide-react'
-import HouseholdPage, { Household } from "./household/page"
+import HouseholdPage from "./household/page"
 import {
   Table,
   TableBody,
@@ -200,7 +200,8 @@ export default function OverviewPage() {
     //   </div>
     // </TooltipProvider>
     <div>
-      <HouseholdPage/>
+      <HouseholdPage />
+     
     </div>
   )
 }
