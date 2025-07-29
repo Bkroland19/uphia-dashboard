@@ -1,208 +1,231 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, CreditCard, DollarSign, Users, HelpCircle } from 'lucide-react'
-import HouseholdPage from "./household/page"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-// import Household from "@/components/household"
+"use client";
 
-const recentSales = [
-  {
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    amount: "$300",
-  },
-  {
-    name: "Bob Smith",
-    email: "bob@example.com",
-    amount: "$150",
-  },
-  {
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    amount: "$450",
-  },
-  {
-    name: "Diana Ross",
-    email: "diana@example.com",
-    amount: "$275",
-  },
-  {
-    name: "Edward Norton",
-    email: "edward@example.com",
-    amount: "$550",
-  },
-]
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Users, Home, UserCheck, Database, TrendingUp } from "lucide-react";
 
-const topProducts = [
-  { name: "Product A", sales: 100, revenue: "$5000" },
-  { name: "Product B", sales: 85, revenue: "$4250" },
-  { name: "Product C", sales: 70, revenue: "$3500" },
-  { name: "Product D", sales: 55, revenue: "$2750" },
-  { name: "Product E", sales: 40, revenue: "$2000" },
-]
-
-export function InfoTooltip({ content }: { content: string }) {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>
-          <HelpCircle className="h-4 w-4 text-muted-foreground" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{content}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
+interface DashboardData {
+  householdInterview: {
+    totalRecords: number;
+    locations: any[];
+  };
+  householdRoster: {
+    totalRecords: number;
+  };
+  individualInterview: {
+    totalRecords: number;
+  };
+  surveyDataHub: {
+    totalRecords: number;
+  };
 }
 
-export default function OverviewPage() {
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('/api/dashboard');
+      const dashboardData = await response.json();
+      setData(dashboardData);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Loading dashboard data...</div>
+      </div>
+    );
+  }
+
+  const totalRecords = (data?.householdInterview?.totalRecords || 0) +
+    (data?.householdRoster?.totalRecords || 0) +
+    (data?.individualInterview?.totalRecords || 0) +
+    (data?.surveyDataHub?.totalRecords || 0);
+
+  const chartData = [
+    {
+      name: 'Household Interview',
+      value: data?.householdInterview?.totalRecords || 0,
+      icon: <Home className="w-4 h-4" />
+    },
+    {
+      name: 'Household Roster',
+      value: data?.householdRoster?.totalRecords || 0,
+      icon: <Users className="w-4 h-4" />
+    },
+    {
+      name: 'Individual Interview',
+      value: data?.individualInterview?.totalRecords || 0,
+      icon: <UserCheck className="w-4 h-4" />
+    },
+    {
+      name: 'Survey Data Hub',
+      value: data?.surveyDataHub?.totalRecords || 0,
+      icon: <Database className="w-4 h-4" />
+    }
+  ];
+
+  const locationData = data?.householdInterview?.locations?.slice(0, 10) || [];
+
   return (
-    // <TooltipProvider>
-    //   <div className="space-y-6">
-    //     <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-    //     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-    //       <Card>
-    //         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-    //           <CardTitle className="text-sm font-medium">
-    //             Total Revenue
-    //             <InfoTooltip content="Total revenue generated this month" />
-    //           </CardTitle>
-    //           <DollarSign className="h-4 w-4 text-muted-foreground" />
-    //         </CardHeader>
-    //         <CardContent>
-    //           <div className="text-2xl font-bold">$45,231.89</div>
-    //           <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-    //         </CardContent>
-    //       </Card>
-    //       <Card>
-    //         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-    //           <CardTitle className="text-sm font-medium">
-    //             Subscriptions
-    //             <InfoTooltip content="Total active subscriptions" />
-    //           </CardTitle>
-    //           <Users className="h-4 w-4 text-muted-foreground" />
-    //         </CardHeader>
-    //         <CardContent>
-    //           <div className="text-2xl font-bold">+2350</div>
-    //           <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-    //         </CardContent>
-    //       </Card>
-    //       <Card>
-    //         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-    //           <CardTitle className="text-sm font-medium">
-    //             Sales
-    //             <InfoTooltip content="Total number of sales this month" />
-    //           </CardTitle>
-    //           <CreditCard className="h-4 w-4 text-muted-foreground" />
-    //         </CardHeader>
-    //         <CardContent>
-    //           <div className="text-2xl font-bold">+12,234</div>
-    //           <p className="text-xs text-muted-foreground">+19% from last month</p>
-    //         </CardContent>
-    //       </Card>
-    //       <Card>
-    //         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-    //           <CardTitle className="text-sm font-medium">
-    //             Active Now
-    //             <InfoTooltip content="Number of users currently active" />
-    //           </CardTitle>
-    //           <Activity className="h-4 w-4 text-muted-foreground" />
-    //         </CardHeader>
-    //         <CardContent>
-    //           <div className="text-2xl font-bold">+573</div>
-    //           <p className="text-xs text-muted-foreground">+201 since last hour</p>
-    //         </CardContent>
-    //       </Card>
-    //     </div>
-    //     <div className="grid gap-6 md:grid-cols-2">
-    //       <Card>
-    //         <CardHeader>
-    //           <CardTitle>Recent Sales</CardTitle>
-    //         </CardHeader>
-    //         <CardContent>
-    //           <Table>
-    //             <TableHeader>
-    //               <TableRow>
-    //                 <TableHead>
-    //                   Name
-    //                   <InfoTooltip content="Customer's full name" />
-    //                 </TableHead>
-    //                 <TableHead>
-    //                   Email
-    //                   <InfoTooltip content="Customer's email address" />
-    //                 </TableHead>
-    //                 <TableHead className="text-right">
-    //                   Amount
-    //                   <InfoTooltip content="Total sale amount" />
-    //                 </TableHead>
-    //               </TableRow>
-    //             </TableHeader>
-    //             <TableBody>
-    //               {recentSales.map((sale) => (
-    //                 <TableRow key={sale.email}>
-    //                   <TableCell>{sale.name}</TableCell>
-    //                   <TableCell>{sale.email}</TableCell>
-    //                   <TableCell className="text-right">{sale.amount}</TableCell>
-    //                 </TableRow>
-    //               ))}
-    //             </TableBody>
-    //           </Table>
-    //         </CardContent>
-    //       </Card>
-    //       <Card>
-    //         <CardHeader>
-    //           <CardTitle>Top Products</CardTitle>
-    //         </CardHeader>
-    //         <CardContent>
-    //           <Table>
-    //             <TableHeader>
-    //               <TableRow>
-    //                 <TableHead>
-    //                   Product
-    //                   <InfoTooltip content="Product name" />
-    //                 </TableHead>
-    //                 <TableHead>
-    //                   Sales
-    //                   <InfoTooltip content="Number of units sold" />
-    //                 </TableHead>
-    //                 <TableHead className="text-right">
-    //                   Revenue
-    //                   <InfoTooltip content="Total revenue generated" />
-    //                 </TableHead>
-    //               </TableRow>
-    //             </TableHeader>
-    //             <TableBody>
-    //               {topProducts.map((product) => (
-    //                 <TableRow key={product.name}>
-    //                   <TableCell>{product.name}</TableCell>
-    //                   <TableCell>{product.sales}</TableCell>
-    //                   <TableCell className="text-right">{product.revenue}</TableCell>
-    //                 </TableRow>
-    //               ))}
-    //             </TableBody>
-    //           </Table>
-    //         </CardContent>
-    //       </Card>
-    //     </div>
-    //   </div>
-    // </TooltipProvider>
-    <div>
-      <HouseholdPage />
-     
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+        <p className="text-muted-foreground">
+          Summary statistics from UPHIA survey databases
+        </p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Records</CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalRecords.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              Across all databases
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Household Interviews</CardTitle>
+            <Home className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(data?.householdInterview?.totalRecords || 0).toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              ug_hh_int database
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Household Rosters</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(data?.householdRoster?.totalRecords || 0).toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              ug_hh_rstr database
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Individual Interviews</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(data?.individualInterview?.totalRecords || 0).toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              ug_ind_int database
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Data Distribution</CardTitle>
+            <CardDescription>Records by database type</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Locations</CardTitle>
+            <CardDescription>Household interviews by location</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={locationData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="district" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Database Status</CardTitle>
+          <CardDescription>Current status of all survey databases</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {chartData.map((item, index) => (
+              <div key={item.name} className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                  <span className="text-sm font-medium">{item.name}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">
+                    {item.value.toLocaleString()} records
+                  </span>
+                  <TrendingUp className="w-4 h-4 text-green-500" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
 

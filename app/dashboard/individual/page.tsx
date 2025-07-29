@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Search, Filter, Download } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { UserCheck, Search, Filter, Download, Users, Activity } from "lucide-react";
 
-interface HouseholdData {
+interface IndividualData {
   data: any[];
   pagination: {
     total: number;
@@ -17,37 +18,44 @@ interface HouseholdData {
     limit: number;
     totalPages: number;
   };
+  analytics: {
+    totalRecords: number;
+    byModule: any[];
+    byStatus: any[];
+  };
 }
 
-export default function HouseholdInterviewPage() {
-  const [data, setData] = useState<HouseholdData | null>(null);
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+export default function IndividualInterviewPage() {
+  const [data, setData] = useState<IndividualData | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    district: "",
-    subcounty: "",
+    module: "all",
+    status: "all",
     page: 1,
     limit: 50
   });
 
   useEffect(() => {
-    fetchHouseholdData();
+    fetchIndividualData();
   }, [filters]);
 
-  const fetchHouseholdData = async () => {
+  const fetchIndividualData = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: filters.page.toString(),
         limit: filters.limit.toString(),
-        ...(filters.district && { district: filters.district }),
-        ...(filters.subcounty && { subcounty: filters.subcounty })
+        ...(filters.module && filters.module !== 'all' && { module: filters.module }),
+        ...(filters.status && filters.status !== 'all' && { status: filters.status })
       });
 
-      const response = await fetch(`/api/household-interview?${params}`);
-      const householdData = await response.json();
-      setData(householdData);
+      const response = await fetch(`/api/individual-interview?${params}`);
+      const individualData = await response.json();
+      setData(individualData);
     } catch (error) {
-      console.error('Error fetching household data:', error);
+      console.error('Error fetching individual data:', error);
     } finally {
       setLoading(false);
     }
@@ -70,13 +78,13 @@ export default function HouseholdInterviewPage() {
 
   const exportData = () => {
     // Implementation for data export
-    console.log('Exporting data...');
+    console.log('Exporting individual interview data...');
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading household interview data...</div>
+        <div className="text-lg">Loading individual interview data...</div>
       </div>
     );
   }
@@ -85,9 +93,9 @@ export default function HouseholdInterviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Household Interviews</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Individual Interviews</h1>
           <p className="text-muted-foreground">
-            Detailed view of household interview data from ug_hh_int database
+            Detailed view of individual interview data from ug_ind_int database
           </p>
         </div>
         <Button onClick={exportData} className="flex items-center gap-2">
@@ -97,18 +105,46 @@ export default function HouseholdInterviewPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Records</CardTitle>
-            <Home className="h-4 w-4 text-muted-foreground" />
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data?.pagination?.total?.toLocaleString() || 0}
+              {data?.analytics?.totalRecords?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Household interviews
+              Individual interviews
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Modules</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {data?.analytics?.byModule?.length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Survey modules
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">87.5%</div>
+            <p className="text-xs text-muted-foreground">
+              Survey completion
             </p>
           </CardContent>
         </Card>
@@ -127,17 +163,53 @@ export default function HouseholdInterviewPage() {
             </p>
           </CardContent>
         </Card>
+      </div>
 
+      {/* Analytics Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Records per Page</CardTitle>
-            <Search className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Data by Module</CardTitle>
+            <CardDescription>Records distributed by survey module</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filters.limit}</div>
-            <p className="text-xs text-muted-foreground">
-              Page size
-            </p>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={data?.analytics?.byModule || []}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="count"
+                >
+                  {(data?.analytics?.byModule || []).map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Status Distribution</CardTitle>
+            <CardDescription>Records by completion status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data?.analytics?.byStatus || []}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
@@ -146,26 +218,26 @@ export default function HouseholdInterviewPage() {
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <CardDescription>Filter household interview data by location</CardDescription>
+          <CardDescription>Filter individual interview data</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="district">District</Label>
+              <Label htmlFor="module">Module</Label>
               <Input
-                id="district"
-                placeholder="Enter district name"
-                value={filters.district}
-                onChange={(e) => handleFilterChange('district', e.target.value)}
+                id="module"
+                placeholder="Enter module name"
+                value={filters.module}
+                onChange={(e) => handleFilterChange('module', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="subcounty">Subcounty</Label>
+              <Label htmlFor="status">Status</Label>
               <Input
-                id="subcounty"
-                placeholder="Enter subcounty name"
-                value={filters.subcounty}
-                onChange={(e) => handleFilterChange('subcounty', e.target.value)}
+                id="status"
+                placeholder="Enter status"
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -192,9 +264,9 @@ export default function HouseholdInterviewPage() {
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Household Interview Data</CardTitle>
+          <CardTitle>Individual Interview Data</CardTitle>
           <CardDescription>
-            Detailed records from the household interview survey
+            Detailed records from the individual interview survey
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -203,28 +275,26 @@ export default function HouseholdInterviewPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>District</TableHead>
-                  <TableHead>Subcounty</TableHead>
-                  <TableHead>Parish</TableHead>
-                  <TableHead>Village</TableHead>
-                  <TableHead>Deaths</TableHead>
-                  <TableHead>Toilet Share</TableHead>
-                  <TableHead>Cooking Fuel</TableHead>
+                  <TableHead>Module</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data?.data?.map((record: any, index: number) => (
-                  <TableRow key={record['surveyhhint_hh_qnr-id'] || index}>
+                  <TableRow key={record.id || index}>
                     <TableCell className="font-medium">
-                      {record['surveyhhint_hh_qnr-id']}
+                      {record.id || record['individual-id'] || index}
                     </TableCell>
-                    <TableCell>{record.district || record.hhi_district_code || 'N/A'}</TableCell>
-                    <TableCell>{record.subcounty || record.hhi_subcounty_code || 'N/A'}</TableCell>
-                    <TableCell>{record.parish || record.hhi_parish_code || 'N/A'}</TableCell>
-                    <TableCell>{record.village || record.hhi_village_code || 'N/A'}</TableCell>
-                    <TableCell>{record.deaths || 'N/A'}</TableCell>
-                    <TableCell>{record.toiletshare || 'N/A'}</TableCell>
-                    <TableCell>{record.cookingfuel || 'N/A'}</TableCell>
+                    <TableCell>{record.module || record.table_name || 'N/A'}</TableCell>
+                    <TableCell>{record.status || 'N/A'}</TableCell>
+                    <TableCell>{record.start_date || 'N/A'}</TableCell>
+                    <TableCell>{record.end_date || 'N/A'}</TableCell>
+                    <TableCell>{record.duration || 'N/A'}</TableCell>
+                    <TableCell>{record.notes || 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -266,4 +336,4 @@ export default function HouseholdInterviewPage() {
       </Card>
     </div>
   );
-}
+} 

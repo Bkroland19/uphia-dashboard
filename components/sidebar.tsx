@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/tooltip";
 
 const navItems = [
-	{ name: "Household Data", href: "/dashboard", icon: LayoutDashboard },
-	// { name: "Household Data", href: "/dashboard/household", icon: LayoutDashboard },
+	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+	{ name: "Household Interviews", href: "/dashboard/household", icon: LayoutDashboard },
+	{ name: "Household Roster", href: "/dashboard/roster", icon: LayoutDashboard },
+	{ name: "Individual Interviews", href: "/dashboard/individual", icon: LayoutDashboard },
 	{ name: "Survey Data", href: "/dashboard/survey", icon: LayoutDashboard },
 	{ name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
 	{ name: "Settings", href: "/dashboard/settings", icon: Settings },
